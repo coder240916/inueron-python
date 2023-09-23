@@ -1,0 +1,91 @@
+Assignment-1
+
+CREATE TABLE tech(
+id INTEGER ,
+tech VARCHAR(50));
+
+INSERT INTO tech
+VALUES(1,'DS'),(1,'Tableau'),(1,'SQL'),(2,'R'),(2,'PowerBI'),(1,'Python');
+
+SELECT * FROM tech;
+
+
+Solution-1
+
+SELECT id 
+FROM tech
+WHERE tech in ('DS','SQL','Tableau','Python')
+GROUP BY id
+having COUNT(DISTINCT(tech))=4;
+
+
+Solution-2
+
+SELECT DISTINCT id
+FROM (
+    SELECT id FROM tech WHERE tech = 'DS'
+    UNION
+    SELECT id FROM tech WHERE tech = 'SQL'
+    UNION
+    SELECT id FROM tech WHERE tech = 'Python'
+    UNION
+    SELECT id FROM tech WHERE tech = 'Tableau'
+) AS distinct_tech_ids;
+
+
+Solution-3
+
+SELECT id,
+SUM(CASE WHEN tech IN ('DS','SQL','Tableau','Python') THEN 1 ELSE 0 END ) AS count
+FROM tech
+GROUP BY id
+HAVING SUM(CASE WHEN tech IN ('DS','SQL','Tableau','Python') THEN 1 ELSE 0 END ) = 4;
+
+
+
+Assignment-2
+
+CREATE TABLE product_info(
+  pr_id INT PRIMARY KEY,
+   name VARCHAR(255)
+);
+
+INSERT INTO product_info(pr_id , name) VALUES (1001, 'Blog');
+INSERT INTO product_info(pr_id , name) VALUES (1002, 'Youtube');
+INSERT INTO product_info(pr_id , name) VALUES (1003, 'Education');
+
+SELECT * FROM product_info;
+
+CREATE TABLE pr_info_likes (
+    id INT PRIMARY KEY,
+   pr_id INT,
+   liked_date DATE
+);
+
+INSERT INTO pr_info_likes (id, pr_id, liked_date) VALUES (1, 1001, '2023-08-19');
+INSERT INTO pr_info_likes (id, pr_id, liked_date) VALUES (2, 1003, '2023-01-18');
+
+SELECT * FROM pr_info_likes;
+
+
+Solution-1
+
+SELECT * FROM product_info
+WHERE pr_id NOT IN
+(SELECT pr_id 
+ FROM  pr_info_likes );
+
+Solution-2
+
+SELECT product_info.pr_id FROM product_info
+LEFT OUTER JOIN pr_info_likes
+ON product_info.pr_id = pr_info_likes.pr_id
+WHERE pr_info_likes.pr_id IS NULL;
+
+Solution-3
+
+SELECT pr_id FROM product_info
+WHERE NOT EXISTS(
+SELECT 1 FROM pr_info_likes
+WHERE product_info.pr_id = pr_info_likes.pr_id);
+
